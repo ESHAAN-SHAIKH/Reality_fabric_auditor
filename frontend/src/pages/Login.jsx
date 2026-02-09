@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
+import { Shield, Eye, EyeOff, Sparkles, Mail, Lock } from 'lucide-react';
 
 // ... existing imports
 
