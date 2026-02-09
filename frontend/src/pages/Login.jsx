@@ -14,7 +14,7 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
     setLoading(true);
 
     try {
@@ -25,7 +25,7 @@ export default function Login() {
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("auth", "true");
-      
+
       console.log('✅ Login success');
       navigate("/dashboard", { replace: true });
     } catch (err) {

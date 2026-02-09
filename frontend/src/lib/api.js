@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAuthStore } from "../stores/auth.store";
+// import { useAuthStore } from "../stores/auth.store"; // Removed to break circular dependency
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
@@ -10,7 +10,7 @@ const api = axios.create({
    REQUEST INTERCEPTOR
 ======================= */
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,7 +25,8 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       // auto logout on token expiry
-      useAuthStore.getState().logout();
+      localStorage.removeItem("token");
+      localStorage.removeItem("auth");
       window.location.href = "/login";
     }
     return Promise.reject(err);

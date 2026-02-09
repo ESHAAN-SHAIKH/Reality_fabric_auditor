@@ -1,0 +1,4 @@
+﻿
+> reality-fabric-frontend@4.0.0 build
+> vite build
+
