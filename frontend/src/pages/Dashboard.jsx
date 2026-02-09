@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import api from "../lib/api";
-import { Camera, CameraOff, Zap, Clock, Activity, Eye, Sparkles, Download, History } from "lucide-react";
+import { Camera, CameraOff, Zap, Clock, Activity, Eye, Sparkles as LucideSparkles, Download, History } from "lucide-react";
 
 export default function Dashboard() {
   const videoRef = useRef(null);
@@ -290,7 +290,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
+                <LucideSparkles className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
@@ -490,7 +490,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-white" />
+              <LucideSparkles className="w-3 h-3 text-white" />
             </div>
             <span className="text-slate-400 font-mono font-medium">Reality Auditor v2.0</span>
           </div>
