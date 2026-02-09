@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/api";
-import { Shield, Eye, EyeOff, Sparkles, Mail, Lock } from 'lucide-react';
+import { Sparkles as LucideSparkles, Shield, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 // ... existing imports
 
@@ -50,7 +50,7 @@ export default function Login() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
+                <LucideSparkles className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
@@ -147,7 +147,7 @@ export default function Login() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5" />
+                    <LucideSparkles className="w-5 h-5" />
                     Enter Platform
                   </>
                 )}
@@ -162,7 +162,7 @@ export default function Login() {
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-white" />
+              <LucideSparkles className="w-3 h-3 text-white" />
             </div>
             <span className="text-slate-400 font-mono font-medium">Reality Auditor v2.0</span>
           </div>
