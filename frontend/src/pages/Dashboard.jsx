@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import api from "../lib/api";
 import { Camera, CameraOff, Zap, Clock, Activity, Eye, Sparkles, Download, History } from "lucide-react";
 
 export default function Dashboard() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  
+
   const [cameraOn, setCameraOn] = useState(false);
   const [geminiTestActive, setGeminiTestActive] = useState(false);
   const [countdown, setCountdown] = useState(30);
@@ -37,7 +38,7 @@ export default function Dashboard() {
   const runAnalysis = useCallback(async () => {
     if (!cameraOn || !videoRef.current || !videoRef.current.videoWidth) return;
     setLoading(true);
-    
+
     try {
       const video = videoRef.current;
       canvasRef.current.width = video.videoWidth || 640;
@@ -47,27 +48,25 @@ export default function Dashboard() {
 
       const base64Image = canvasRef.current.toDataURL("image/jpeg", 0.8).replace(/^data:image\/[a-z]+;base64,/, "");
 
-      const res = await fetch("http://localhost:4000/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64Image }),
-      });
+      const res = await api.post("/analyze", { image: base64Image });
 
-      if (!res.ok) throw new Error('API request failed');
+      // No need to check !res.ok for axios unless status is non-2xx (handled by catch)
+      const data = res.data;
 
-      const data = await res.json();
+      // const data = await res.json(); // Axios does this automatically.
+      // Already assigned data above.
       const now = new Date();
-      const newAnalysis = { 
-        ...data, 
+      const newAnalysis = {
+        ...data,
         lighting: data.lighting === 'dark' ? 'Low Light' : data.lighting === 'very_low' ? 'Very Dim' : 'Well Lit',
-        lastUpdated: now.toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        lastUpdated: now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         })
       };
-      
+
       setAnalysis(newAnalysis);
 
       setFrameHistory(prev => [
@@ -90,15 +89,15 @@ export default function Dashboard() {
         people: 0,
         movement: "none",
         lighting: "Low Light",
-        lastUpdated: now.toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        lastUpdated: now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         })
       };
       setAnalysis(fallbackAnalysis);
-      
+
       setFrameHistory(prev => [
         {
           id: Date.now(),
@@ -116,10 +115,10 @@ export default function Dashboard() {
   const testGemini = useCallback(async () => {
     setGeminiTestActive(true);
     setCountdown(5);
-    
+
     try {
-      const res = await fetch("http://localhost:4000/api/test-gemini");
-      const data = await res.json();
+      const res = await api.get("/test-gemini"); // changed to api.get
+      const data = res.data;
       const now = new Date();
       setAnalysis({
         status: "live",
@@ -129,11 +128,11 @@ export default function Dashboard() {
         movement: "none",
         lighting: "Analyzing",
         recommendation: "AI surveillance ready",
-        lastUpdated: now.toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        lastUpdated: now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         })
       });
     } catch {
@@ -145,11 +144,11 @@ export default function Dashboard() {
         people: 0,
         movement: "none",
         lighting: "Analyzing",
-        lastUpdated: now.toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        lastUpdated: now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         })
       });
     }
@@ -166,35 +165,35 @@ export default function Dashboard() {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: "user" }
       });
-      
+
       videoRef.current.srcObject = stream;
       streamRef.current = stream;
       setCameraOn(true);
-      
+
       const now = new Date();
-      setAnalysis({ 
-        status: "live", 
-        message: "Camera active - test Gemini to begin", 
+      setAnalysis({
+        status: "live",
+        message: "Camera active - test Gemini to begin",
         lighting: "Analyzing",
-        lastUpdated: now.toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        lastUpdated: now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         })
       });
     } catch (err) {
       console.error('Camera error:', err);
       const now = new Date();
-      setAnalysis({ 
-        status: "error", 
-        message: "Camera permission needed", 
+      setAnalysis({
+        status: "error",
+        message: "Camera permission needed",
         lighting: "N/A",
-        lastUpdated: now.toLocaleTimeString('en-US', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
+        lastUpdated: now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         })
       });
     }
@@ -205,18 +204,18 @@ export default function Dashboard() {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    
+
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    
+
     setCameraOn(false);
     setGeminiTestActive(false);
-    setAnalysis({ 
-      status: "idle", 
-      message: "Click Test Gemini to start", 
+    setAnalysis({
+      status: "idle",
+      message: "Click Test Gemini to start",
       lighting: "Analyzing",
-      lastUpdated: null 
+      lastUpdated: null
     });
   }, []);
 
@@ -229,9 +228,9 @@ export default function Dashboard() {
       aiModel: "Gemini 2.5 Flash",
       dashboardVersion: "v2.0"
     };
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
-      type: 'application/json' 
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json'
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -302,7 +301,7 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <button 
+            <button
               onClick={handleLogout}
               className="bg-red-600/90 hover:bg-red-500/90 text-white px-5 py-1.5 sm:px-6 sm:py-2 rounded-xl font-semibold border border-red-500/50 backdrop-blur-sm transition-all hover:scale-[1.02] shadow-lg w-full sm:w-auto flex items-center justify-center gap-1.5 text-sm"
             >
@@ -316,7 +315,7 @@ export default function Dashboard() {
       <main className="flex-1 overflow-y-auto pb-20 sm:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 xl:gap-12 items-start">
-            
+
             {/* LIVE CAMERA */}
             <div className={`space-y-6 xl:max-w-2xl ${isMobile ? 'order-1' : 'order-2 xl:order-1'}`}>
               <div className="bg-black/80 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-slate-700/50 shadow-xl">
@@ -326,29 +325,28 @@ export default function Dashboard() {
                   </div>
                   <h2 className="text-lg sm:text-xl font-bold text-emerald-400">Live Feed</h2>
                 </div>
-                
-                <video 
-                  ref={videoRef} 
-                  autoPlay 
-                  playsInline 
-                  muted 
+
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
                   className="w-full h-56 sm:h-64 lg:h-80 object-cover rounded-xl border-2 border-slate-600 shadow-lg"
                 />
                 <canvas ref={canvasRef} className="hidden" />
-                
-                <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl text-center font-bold text-base sm:text-lg border backdrop-blur-sm shadow-xl transition-all ${
-                  analysis.status === 'normal' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-emerald-500/25' :
+
+                <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl text-center font-bold text-base sm:text-lg border backdrop-blur-sm shadow-xl transition-all ${analysis.status === 'normal' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-emerald-500/25' :
                   analysis.status === 'live' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50 shadow-indigo-500/25' :
-                  analysis.status === 'error' ? 'bg-red-500/20 text-red-400 border-red-500/50 shadow-red-500/25' :
-                  'bg-slate-700/50 text-slate-400 border-slate-600/50 shadow-slate-500/25'
-                }`}>
+                    analysis.status === 'error' ? 'bg-red-500/20 text-red-400 border-red-500/50 shadow-red-500/25' :
+                      'bg-slate-700/50 text-slate-400 border-slate-600/50 shadow-slate-500/25'
+                  }`}>
                   {analysis.status === 'idle' ? 'READY' : analysis.status.toUpperCase()}
                 </div>
               </div>
 
               <div className="space-y-3 sm:space-y-4">
                 {!cameraOn ? (
-                  <button 
+                  <button
                     onClick={enableCamera}
                     className="w-full h-12 sm:h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base rounded-xl border-2 border-emerald-500/50 backdrop-blur-xl transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 px-4"
                   >
@@ -358,7 +356,7 @@ export default function Dashboard() {
                   </button>
                 ) : (
                   <>
-                    <button 
+                    <button
                       onClick={disableCamera}
                       className="w-full h-12 sm:h-14 bg-slate-800/90 hover:bg-slate-700/90 text-white font-semibold text-sm sm:text-base rounded-xl border-2 border-slate-700/50 backdrop-blur-xl transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 px-4"
                     >
@@ -366,8 +364,8 @@ export default function Dashboard() {
                       <span className="sm:hidden">Stop</span>
                       <span className="hidden sm:inline">Disable Camera</span>
                     </button>
-                    
-                    <button 
+
+                    <button
                       onClick={testGemini}
                       className="w-full h-12 sm:h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm sm:text-base rounded-xl border-2 border-indigo-500/50 backdrop-blur-xl transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 px-4"
                     >
@@ -396,7 +394,7 @@ export default function Dashboard() {
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-emerald-400">Security Monitor</h2>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div className="text-center">
                     <div className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent mb-4">
@@ -424,11 +422,10 @@ export default function Dashboard() {
                   <div className="text-3xl sm:text-4xl font-bold text-emerald-400 mb-2">{analysis.people}</div>
                   <div className="text-slate-500 text-xs sm:text-sm font-medium">People</div>
                 </div>
-                
+
                 <div className="bg-black/80 p-4 sm:p-6 rounded-xl border border-slate-700/50 text-center backdrop-blur-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-xl flex items-center justify-center border-2 mb-4 shadow-lg ${
-                    analysis.movement === 'high' ? 'bg-gradient-to-br from-orange-500/20 to-red-500/20 border-orange-500/50' : 'bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-blue-500/50'
-                  }`}>
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-xl flex items-center justify-center border-2 mb-4 shadow-lg ${analysis.movement === 'high' ? 'bg-gradient-to-br from-orange-500/20 to-red-500/20 border-orange-500/50' : 'bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-blue-500/50'
+                    }`}>
                     <Zap className={`w-5 h-5 sm:w-6 sm:h-6 ${analysis.movement === 'high' ? 'text-orange-400' : 'text-blue-400'}`} />
                   </div>
                   <div className={`text-3xl sm:text-4xl font-bold ${analysis.movement === 'high' ? 'text-orange-400' : 'text-blue-400'} mb-2`}>
@@ -436,11 +433,10 @@ export default function Dashboard() {
                   </div>
                   <div className="text-slate-500 text-xs sm:text-sm font-medium">Movement</div>
                 </div>
-                
+
                 <div className="bg-black/80 p-4 sm:p-6 rounded-xl border border-slate-700/50 text-center backdrop-blur-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-xl flex items-center justify-center border-2 mb-4 shadow-lg ${
-                    analysis.lighting === 'Low Light' || analysis.lighting === 'Very Dim' ? 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-500/50' : 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/50'
-                  }`}>
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-xl flex items-center justify-center border-2 mb-4 shadow-lg ${analysis.lighting === 'Low Light' || analysis.lighting === 'Very Dim' ? 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-500/50' : 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/50'
+                    }`}>
                     <Eye className={`w-5 h-5 sm:w-6 sm:h-6 ${analysis.lighting === 'Low Light' || analysis.lighting === 'Very Dim' ? 'text-purple-400' : 'text-yellow-400'}`} />
                   </div>
                   <div className={`text-3xl sm:text-4xl font-bold ${analysis.lighting === 'Low Light' || analysis.lighting === 'Very Dim' ? 'text-purple-400' : 'text-yellow-400'} mb-2`}>
@@ -448,7 +444,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-slate-500 text-xs sm:text-sm font-medium">Lighting</div>
                 </div>
-                
+
                 <div className="bg-black/80 p-4 sm:p-6 rounded-xl border border-slate-700/50 text-center backdrop-blur-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto bg-gradient-to-br from-slate-500/20 to-slate-700/20 rounded-xl flex items-center justify-center border-2 border-slate-500/50 mb-4 shadow-lg">
                     <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" />

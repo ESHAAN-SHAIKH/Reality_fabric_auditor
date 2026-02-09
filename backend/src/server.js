@@ -6,9 +6,23 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'] }));
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '20mb' }));
 
 // 🔥 YOUR EXACT CREDENTIALS
@@ -27,9 +41,9 @@ function extractJsonFromResponse(text) {
 // ===== 🔐 LOGIN =====
 app.post('/api/auth/login', (req, res) => {
   console.log('🔐 LOGIN:', req.body.email);
-  
+
   const { email, password } = req.body;
-  
+
   if (email === VALID_USER.email && password === VALID_USER.password) {
     const token = `rf-${Date.now()}-${Math.random().toString(36).substr(2, 16)}`;
     console.log('✅ LOGIN SUCCESS');
@@ -48,11 +62,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 app.post('/api/analyze', async (req, res) => {
   console.log('🎥 ANALYSIS START');
-  
+
   try {
     const { image } = req.body;
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    
+
     const prompt = `SECURITY SURVEILLANCE - JSON ONLY
 
 Dark room likely. Return EXACTLY:
@@ -130,7 +144,7 @@ app.post('/api/test-gemini', async (req, res) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent('Confirm: GEMINI-2.5-LIVE');
-    
+
     res.json({
       success: true,
       realGemini: true,

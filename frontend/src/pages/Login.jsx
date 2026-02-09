@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { Shield, Eye, EyeOff, Sparkles, Mail, Lock } from 'lucide-react';
+import api from "../lib/api";
+
+// ... existing imports
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:4000/api/auth/login", {
+      const res = await api.post("/auth/login", {
         email,
         password,
       }, { timeout: 10000 });

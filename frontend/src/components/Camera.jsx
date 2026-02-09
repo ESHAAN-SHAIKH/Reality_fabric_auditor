@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
+import api from "../lib/api";
 
 export default function Camera() {
   const videoRef = useRef(null);
@@ -30,7 +30,7 @@ export default function Camera() {
     const image = canvas.toDataURL("image/jpeg");
 
     try {
-      await axios.post("http://localhost:4000/api/camera/frame", { image });
+      await api.post("/camera/frame", { image });
     } catch (err) {
       console.error("Frame send failed", err);
     }
