@@ -7,7 +7,7 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={!token ? <Login /> : <Navigate to="/dashboard" replace />} />
 
       <Route
         path="/dashboard"
@@ -16,12 +16,11 @@ export default function App() {
         }
       />
 
-      <Route
-        path="*"
-        element={
-          token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
-        }
-      />
+      {/* Explicit Root Redirect */}
+      <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} replace />} />
+
+      {/* Catch-all Redirect */}
+      <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} replace />} />
     </Routes>
   );
 }
