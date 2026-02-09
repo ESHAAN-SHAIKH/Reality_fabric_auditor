@@ -56,4 +56,38 @@ Vercel is optimized for frontend frameworks like React/Vite.
 4.  Test the "Gemini Analysis" button.
 
 ---
-**Note**: The backend uses a specific port `4000` locally, but on Render it will automatically use the port assigned by the `PORT` environment variable, which the code has been updated to support.
+
+## Option 3: Deploy Frontend to Netlify (Recommended Alternative)
+
+If Vercel gives you trouble, Netlify is a great alternative.
+
+### Method A: Manual Drag & Drop (Fastest)
+
+1.  **Build the project locally:**
+    ```bash
+    cd frontend
+    npm run build
+    ```
+2.  Open your file explorer and find `frontend/dist`.
+3.  Go to [Netlify Drop](https://app.netlify.com/drop).
+4.  Drag and drop the `dist` folder onto the page.
+5.  **Done!** Netlify will give you a live URL instantly.
+
+### Method B: Connect Git (Automatic)
+
+1.  Push your code to GitHub (if GitHub is working).
+2.  Log in to [Netlify](https://app.netlify.com/).
+3.  Click **"Add new site"** > **"Import from an existing project"**.
+4.  Select **GitHub** and choose your repository: `Reality_fabric_auditor`.
+5.  **Configure Build Settings:**
+    *   **Base directory:** `frontend`
+    *   **Build command:** `npm run build`
+    *   **Publish directory:** `dist`
+6.  **Add Environment Variables:**
+    *   Click **"Add environment variable"**.
+    *   Key: `VITE_API_URL`
+    *   Value: `https://reality-backend.onrender.com` (Or your Render URL)
+7.  Click **"Deploy"**.
+
+**Note:** I have already added a `_redirects` file so routing will work automatically.
+
